@@ -1,0 +1,645 @@
+<!-- index.html -->
+<script type="text/canvas">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Treble Clef Solfege Trainer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Outfit', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between select-none">
+
+  <!-- TOP HEADER BAR -->
+  <header class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700/60 sticky top-0 z-20 px-4 py-3">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-lg shadow-indigo-500/30">
+          <i class="fa-solid fa-music text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white leading-tight">Solfege Trainer</h1>
+          <p class="text-xs text-indigo-300 font-medium">Treble Clef Pitch Reader</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="open-settings-btn" class="flex items-center gap-2 px-3 py-2 bg-slate-700/70 hover:bg-slate-700 rounded-xl border border-slate-600/50 transition font-medium text-sm">
+          <i class="fa-solid fa-gear text-indigo-400"></i>
+          <span>Settings</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-4xl w-full mx-auto p-4 flex-1 flex flex-col gap-6 justify-center">
+
+    <!-- STATS AND KEY BAR -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="bg-slate-800/60 border border-slate-700/60 p-3 rounded-2xl flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+          <i class="fa-solid fa-key"></i>
+        </div>
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Active Key</div>
+          <div id="active-key-display" class="font-bold text-slate-100 text-sm">Key of F Major</div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/60 p-3 rounded-2xl flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <i class="fa-solid fa-fire"></i>
+        </div>
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Streak</div>
+          <div id="streak-display" class="font-bold text-slate-100 text-sm">0</div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/60 p-3 rounded-2xl flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Best Streak</div>
+          <div id="high-score-display" class="font-bold text-slate-100 text-sm">0</div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/60 border border-slate-700/60 p-3 rounded-2xl flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+          <i class="fa-solid fa-check-double"></i>
+        </div>
+        <div>
+          <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Total Correct</div>
+          <div id="total-score-display" class="font-bold text-slate-100 text-sm">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KEY MODE TOGGLE BUTTONS -->
+    <div class="flex justify-center gap-2 bg-slate-800/40 p-1.5 rounded-2xl border border-slate-700/40 max-w-md mx-auto w-full">
+      <button id="key-f-btn" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition bg-indigo-600 text-white shadow-md">Key of F</button>
+      <button id="key-g-btn" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white hover:bg-slate-700/50">Key of G</button>
+      <button id="key-mixed-btn" class="flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white hover:bg-slate-700/50">Mixed</button>
+    </div>
+
+    <!-- STAFF DISPLAY CARD -->
+    <div class="bg-slate-800/80 border border-slate-700/80 rounded-3xl p-4 md:p-6 shadow-2xl relative overflow-hidden flex flex-col items-center">
+      
+      <!-- SVG TREBLE STAFF -->
+      <div class="w-full max-w-2xl bg-slate-100 rounded-2xl p-4 shadow-inner relative">
+        <svg id="music-staff" viewBox="0 0 450 160" class="w-full h-auto overflow-visible">
+          <!-- Staff Lines and Notes dynamic rendering -->
+        </svg>
+      </div>
+
+      <!-- ANSWER DROPDOWNS INPUT SECTION -->
+      <div id="dropdowns-container" class="w-full max-w-2xl mt-6 grid gap-3">
+        <!-- Dynamic Dropdowns for 3 or 4 pitches -->
+      </div>
+
+      <!-- FEEDBACK MESSAGE BAR -->
+      <div id="feedback-msg" class="mt-4 text-center min-h-[28px] font-semibold text-sm transition-all duration-200">
+        <!-- Message string -->
+      </div>
+
+      <!-- SUBMIT & ACTION BUTTONS -->
+      <div class="mt-4 flex gap-3 w-full max-w-2xl justify-center">
+        <button id="submit-btn" class="flex-1 max-w-xs py-3 px-6 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold rounded-2xl shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2">
+          <span>Check Answers</span>
+          <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+        <button id="play-all-btn" class="py-3 px-4 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold rounded-2xl transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-volume-high text-indigo-400"></i>
+          <span class="hidden sm:inline">Play Notes</span>
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="py-4 text-center text-xs text-slate-500 border-t border-slate-800">
+    Key of F: Do = 1st Space (F4) | Key of G: Do = 1st Line (G3)
+  </footer>
+
+  <!-- SETTINGS DRAWER OVERLAY -->
+  <div id="settings-overlay" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-30 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+  <!-- SETTINGS SIDEBAR DRAWER -->
+  <div id="settings-drawer" class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-slate-900 border-l border-slate-800 z-40 p-6 flex flex-col justify-between transform translate-x-full transition-transform duration-300 ease-out shadow-2xl overflow-y-auto">
+    <div>
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-sliders text-indigo-400 text-xl"></i>
+          <h2 class="text-lg font-bold text-white">Exercise Settings</h2>
+        </div>
+        <button id="close-settings-btn" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- SETTING 1: NUMBER OF PITCHES -->
+      <div class="mt-6">
+        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Notes per Exercise</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="notes-3-btn" class="py-2.5 rounded-xl border border-slate-700 font-semibold text-sm bg-slate-800 text-white">3 Notes</button>
+          <button id="notes-4-btn" class="py-2.5 rounded-xl border border-indigo-500/60 font-semibold text-sm bg-indigo-600/20 text-indigo-300">4 Notes</button>
+        </div>
+      </div>
+
+      <!-- SETTING 2: PITCH SELECTION -->
+      <div class="mt-8">
+        <div class="flex items-center justify-between mb-3">
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Pitch Pool</label>
+          <div class="flex gap-2">
+            <button id="select-all-pitches" class="text-[11px] text-indigo-400 hover:underline">Select Core</button>
+            <span class="text-slate-600">|</span>
+            <button id="select-full-pitches" class="text-[11px] text-indigo-400 hover:underline">Select All</button>
+          </div>
+        </div>
+
+        <div id="pitch-checkboxes-container" class="grid grid-cols-2 gap-2 max-h-[340px] overflow-y-auto pr-1">
+          <!-- Dynamic Pitch Checkboxes -->
+        </div>
+      </div>
+    </div>
+
+    <div class="pt-6 border-t border-slate-800 mt-6">
+      <button id="save-settings-btn" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition">
+        Apply & New Exercise
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // SOLFEGE DEFINITIONS & STEP SCALES
+    // Treble Staff Reference:
+    // Line 1 = E4 (Y = 102)
+    // Space 1 = F4 (Y = 89)
+    // Line 2 = G4 (Y = 76)
+    // Space 2 = A4 (Y = 63)
+    // Line 3 = B4 (Y = 50)
+    // Space 3 = C5 (Y = 37)
+    // Line 4 = D5 (Y = 24)
+    // Space 4 = E5 (Y = 11)
+    // Line 5 = F5 (Y = -2)
+    // -------------------------------------------------------------
+
+    const SOLFEGE_PITCHES = [
+      { id: 'low_so',  label: 'low so',  scaleOffset: -3, freqOffset: -5 },
+      { id: 'low_la',  label: 'low la',  scaleOffset: -2, freqOffset: -3 },
+      { id: 'low_ti',  label: 'low ti',  scaleOffset: -1, freqOffset: -1 },
+      { id: 'do',      label: 'do',      scaleOffset: 0,  freqOffset: 0  },
+      { id: 're',      label: 're',      scaleOffset: 1,  freqOffset: 2  },
+      { id: 'mi',      label: 'mi',      scaleOffset: 2,  freqOffset: 4  },
+      { id: 'fa',      label: 'fa',      scaleOffset: 3,  freqOffset: 5  },
+      { id: 'so',      label: 'so',      scaleOffset: 4,  freqOffset: 7  },
+      { id: 'la',      label: 'la',      scaleOffset: 5,  freqOffset: 9  },
+      { id: 'ti',      label: 'ti',      scaleOffset: 6,  freqOffset: 11 },
+      { id: 'hi_do',   label: 'high do', scaleOffset: 7,  freqOffset: 12 },
+      { id: 'hi_re',   label: 'high re', scaleOffset: 8,  freqOffset: 14 },
+      { id: 'hi_mi',   label: 'high mi', scaleOffset: 9,  freqOffset: 16 },
+      { id: 'hi_fa',   label: 'high fa', scaleOffset: 10, freqOffset: 17 },
+      { id: 'hi_so',   label: 'high so', scaleOffset: 11, freqOffset: 19 },
+      { id: 'hi_la',   label: 'high la', scaleOffset: 12, freqOffset: 21 }
+    ];
+
+    // Key Base Specs:
+    // Key of F: Do = F4 (1st space). F4 staff step relative to Line 1 (E4) is 1 space up. Y = 89.
+    // Key of G: Do = G3 (1st line below lower ledger line). G3 staff step relative to Line 1 (E4) is 6 steps down. Y = 167.
+    const KEY_CONFIGS = {
+      'F': {
+        name: 'Key of F Major',
+        doBaseFreq: 349.23, // F4
+        doStaffStep: 1,      // 1st Space (F4)
+        accidentalY: 63,    // Bb on 3rd line (B4)
+        accidentalSymbol: '♭'
+      },
+      'G': {
+        name: 'Key of G Major',
+        doBaseFreq: 196.00, // G3
+        doStaffStep: -6,     // 1st Line (G3)
+        accidentalY: 24,    // F# on 5th line (F5)
+        accidentalSymbol: '♯'
+      }
+    };
+
+    // State Variables
+    let currentKeyMode = 'F'; // 'F', 'G', or 'MIXED'
+    let activeKey = 'F';      // Active exercise key ('F' or 'G')
+    let numPitches = 4;
+    let selectedPitchIds = ['do', 're', 'mi', 'so'];
+    let currentSequence = [];
+    let userAnswers = [];
+    let streak = 0;
+    let highScore = 0;
+    let totalScore = 0;
+
+    // Web Audio Synthesizer
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playTone(freq, duration = 0.5) {
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Initialize UI and Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      buildSettingsDrawer();
+      setupEventListeners();
+      generateNewRound();
+    });
+
+    function setupEventListeners() {
+      // Key buttons
+      document.getElementById('key-f-btn').addEventListener('click', () => setKeyMode('F'));
+      document.getElementById('key-g-btn').addEventListener('click', () => setKeyMode('G'));
+      document.getElementById('key-mixed-btn').addEventListener('click', () => setKeyMode('MIXED'));
+
+      // Action buttons
+      document.getElementById('submit-btn').addEventListener('click', checkAnswers);
+      document.getElementById('play-all-btn').addEventListener('click', playCurrentSequence);
+
+      // Drawer toggles
+      document.getElementById('open-settings-btn').addEventListener('click', openSettings);
+      document.getElementById('close-settings-btn').addEventListener('click', closeSettings);
+      document.getElementById('settings-overlay').addEventListener('click', closeSettings);
+
+      // Settings count buttons
+      document.getElementById('notes-3-btn').addEventListener('click', () => setNotesCount(3));
+      document.getElementById('notes-4-btn').addEventListener('click', () => setNotesCount(4));
+
+      // Settings pitch helper links
+      document.getElementById('select-all-pitches').addEventListener('click', () => togglePitchSelection(['do', 're', 'mi', 'so']));
+      document.getElementById('select-full-pitches').addEventListener('click', () => togglePitchSelection(SOLFEGE_PITCHES.map(p => p.id)));
+
+      // Save settings
+      document.getElementById('save-settings-btn').addEventListener('click', () => {
+        readSettingsFromDrawer();
+        closeSettings();
+        generateNewRound();
+      });
+    }
+
+    function setKeyMode(mode) {
+      currentKeyMode = mode;
+      
+      const btnF = document.getElementById('key-f-btn');
+      const btnG = document.getElementById('key-g-btn');
+      const btnMixed = document.getElementById('key-mixed-btn');
+
+      const activeClass = 'bg-indigo-600 text-white shadow-md';
+      const inactiveClass = 'text-slate-400 hover:text-white hover:bg-slate-700/50';
+
+      btnF.className = `flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${mode === 'F' ? activeClass : inactiveClass}`;
+      btnG.className = `flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${mode === 'G' ? activeClass : inactiveClass}`;
+      btnMixed.className = `flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition ${mode === 'MIXED' ? activeClass : inactiveClass}`;
+
+      generateNewRound();
+    }
+
+    function setNotesCount(count) {
+      numPitches = count;
+      const b3 = document.getElementById('notes-3-btn');
+      const b4 = document.getElementById('notes-4-btn');
+
+      if (count === 3) {
+        b3.className = 'py-2.5 rounded-xl border border-indigo-500/60 font-semibold text-sm bg-indigo-600/20 text-indigo-300';
+        b4.className = 'py-2.5 rounded-xl border border-slate-700 font-semibold text-sm bg-slate-800 text-white';
+      } else {
+        b4.className = 'py-2.5 rounded-xl border border-indigo-500/60 font-semibold text-sm bg-indigo-600/20 text-indigo-300';
+        b3.className = 'py-2.5 rounded-xl border border-slate-700 font-semibold text-sm bg-slate-800 text-white';
+      }
+    }
+
+    function buildSettingsDrawer() {
+      const container = document.getElementById('pitch-checkboxes-container');
+      container.innerHTML = '';
+
+      SOLFEGE_PITCHES.forEach(p => {
+        const isChecked = selectedPitchIds.includes(p.id);
+        const div = document.createElement('label');
+        div.className = 'flex items-center gap-2 p-2 bg-slate-800/80 rounded-xl border border-slate-700/50 cursor-pointer hover:bg-slate-800 transition';
+        div.innerHTML = `
+          <input type="checkbox" value="${p.id}" ${isChecked ? 'checked' : ''} class="pitch-checkbox w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 bg-slate-900 border-slate-700">
+          <span class="text-xs font-medium text-slate-200 capitalize">${p.label}</span>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function togglePitchSelection(pitchIds) {
+      const checkboxes = document.querySelectorAll('.pitch-checkbox');
+      checkboxes.forEach(cb => {
+        cb.checked = pitchIds.includes(cb.value);
+      });
+    }
+
+    function readSettingsFromDrawer() {
+      const checkboxes = document.querySelectorAll('.pitch-checkbox:checked');
+      const selected = Array.from(checkboxes).map(cb => cb.value);
+
+      if (selected.length < 2) {
+        alert('Please select at least 2 pitches for the exercises.');
+        return;
+      }
+      selectedPitchIds = selected;
+    }
+
+    function openSettings() {
+      document.getElementById('settings-overlay').classList.remove('opacity-0', 'pointer-events-none');
+      document.getElementById('settings-drawer').classList.remove('translate-x-full');
+    }
+
+    function closeSettings() {
+      document.getElementById('settings-overlay').classList.add('opacity-0', 'pointer-events-none');
+      document.getElementById('settings-drawer').classList.add('translate-x-full');
+    }
+
+    // Generate Exercise Round
+    function generateNewRound() {
+      if (currentKeyMode === 'MIXED') {
+        activeKey = Math.random() < 0.5 ? 'F' : 'G';
+      } else {
+        activeKey = currentKeyMode;
+      }
+
+      document.getElementById('active-key-display').innerText = KEY_CONFIGS[activeKey].name;
+
+      // Filter pitch pool
+      const availablePitches = SOLFEGE_PITCHES.filter(p => selectedPitchIds.includes(p.id));
+      currentSequence = [];
+      userAnswers = new Array(numPitches).fill('');
+
+      for (let i = 0; i < numPitches; i++) {
+        const randomPitch = availablePitches[Math.floor(Math.random() * availablePitches.length)];
+        currentSequence.push(randomPitch);
+      }
+
+      renderStaff();
+      renderDropdowns();
+
+      const feedback = document.getElementById('feedback-msg');
+      feedback.innerText = '';
+      feedback.className = 'mt-4 text-center min-h-[28px] font-semibold text-sm transition-all duration-200';
+    }
+
+    // Convert staff step to SVG Y Coordinate
+    // Line 1 (E4) is Y = 102. Each step (line to space) is 6.5 units.
+    function calculateY(staffStep) {
+      const line1Y = 102;
+      return line1Y - (staffStep * 6.5);
+    }
+
+    function renderStaff() {
+      const svg = document.getElementById('music-staff');
+      svg.innerHTML = '';
+
+      const keyConf = KEY_CONFIGS[activeKey];
+
+      // 1. Staff Lines (5 lines)
+      const lineYCoords = [102, 89, 76, 63, 50]; // E4, G4, B4, D5, F5
+      lineYCoords.forEach(y => {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', '10');
+        line.setAttribute('y1', y);
+        line.setAttribute('x2', '440');
+        line.setAttribute('y2', y);
+        line.setAttribute('stroke', '#334155');
+        line.setAttribute('stroke-width', '2');
+        svg.appendChild(line);
+      });
+
+      // 2. End Double Barline
+      const bar1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      bar1.setAttribute('x1', '434'); bar1.setAttribute('y1', '50');
+      bar1.setAttribute('x2', '434'); bar1.setAttribute('y2', '102');
+      bar1.setAttribute('stroke', '#334155'); bar1.setAttribute('stroke-width', '2');
+      svg.appendChild(bar1);
+
+      const bar2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      bar2.setAttribute('x1', '440'); bar2.setAttribute('y1', '50');
+      bar2.setAttribute('x2', '440'); bar2.setAttribute('y2', '102');
+      bar2.setAttribute('stroke', '#334155'); bar2.setAttribute('stroke-width', '4');
+      svg.appendChild(bar2);
+
+      // 3. Treble Clef PNG Image
+      const clefImg = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+      clefImg.setAttributeNS('http://www.w3.org/1999/xlink', 'href', 'https://cdn.pixabay.com/photo/2016/03/26/01/17/treble-clef-1279909_960_720.png');
+      clefImg.setAttribute('x', '20');
+      clefImg.setAttribute('y', '24');
+      clefImg.setAttribute('width', '55');
+      clefImg.setAttribute('height', '105');
+      svg.appendChild(clefImg);
+
+      // 4. Key Signature Accidental
+      const accText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      accText.setAttribute('x', '82');
+      accText.setAttribute('y', keyConf.accidentalY + 5);
+      accText.setAttribute('font-size', '24');
+      accText.setAttribute('font-weight', 'bold');
+      accText.setAttribute('fill', '#1e293b');
+      accText.textContent = keyConf.accidentalSymbol;
+      svg.appendChild(accText);
+
+      // 5. Quarter Notes Spacing
+      const startX = 140;
+      const spacing = numPitches === 3 ? 95 : 75;
+
+      currentSequence.forEach((pitch, idx) => {
+        const noteX = startX + (idx * spacing);
+        const totalStep = keyConf.doStaffStep + pitch.scaleOffset;
+        const noteY = calculateY(totalStep);
+
+        // Ledger Lines
+        // Top line is F5 (step 8, Y=50). Bottom line is E4 (step 0, Y=102).
+        if (totalStep < 0) {
+          // Below staff
+          for (let s = -2; s >= totalStep; s -= 2) {
+            const ly = calculateY(s);
+            const ledger = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            ledger.setAttribute('x1', noteX - 16); ledger.setAttribute('x2', noteX + 16);
+            ledger.setAttribute('y1', ly); ledger.setAttribute('y2', ly);
+            ledger.setAttribute('stroke', '#334155'); ledger.setAttribute('stroke-width', '2');
+            svg.appendChild(ledger);
+          }
+        } else if (totalStep > 8) {
+          // Above staff
+          for (let s = 10; s <= totalStep; s += 2) {
+            const ly = calculateY(s);
+            const ledger = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            ledger.setAttribute('x1', noteX - 16); ledger.setAttribute('x2', noteX + 16);
+            ledger.setAttribute('y1', ly); ledger.setAttribute('y2', ly);
+            ledger.setAttribute('stroke', '#334155'); ledger.setAttribute('stroke-width', '2');
+            svg.appendChild(ledger);
+          }
+        }
+
+        // Note Stem Direction (Down if at or above middle line B4/step 4)
+        const stemDown = totalStep >= 4;
+
+        // Note Head
+        const head = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        head.setAttribute('cx', noteX);
+        head.setAttribute('cy', noteY);
+        head.setAttribute('rx', '8.5');
+        head.setAttribute('ry', '6');
+        head.setAttribute('fill', '#0f172a');
+        head.setAttribute('transform', `rotate(-20 ${noteX} ${noteY})`);
+        svg.appendChild(head);
+
+        // Stem
+        const stem = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        const stemX = stemDown ? noteX - 7.5 : noteX + 7.5;
+        const stemY1 = noteY;
+        const stemY2 = stemDown ? noteY + 35 : noteY - 35;
+
+        stem.setAttribute('x1', stemX); stem.setAttribute('y1', stemY1);
+        stem.setAttribute('x2', stemX); stem.setAttribute('y2', stemY2);
+        stem.setAttribute('stroke', '#0f172a'); stem.setAttribute('stroke-width', '2.5');
+        svg.appendChild(stem);
+      });
+    }
+
+    function renderDropdowns() {
+      const container = document.getElementById('dropdowns-container');
+      container.innerHTML = '';
+      container.className = `w-full max-w-2xl mt-6 grid gap-3 ${numPitches === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'}`;
+
+      const activePitches = SOLFEGE_PITCHES.filter(p => selectedPitchIds.includes(p.id));
+
+      for (let i = 0; i < numPitches; i++) {
+        const div = document.createElement('div');
+        div.className = 'flex flex-col gap-1';
+
+        const label = document.createElement('span');
+        label.className = 'text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center';
+        label.innerText = `Note ${i + 1}`;
+
+        const select = document.createElement('select');
+        select.id = `select-note-${i}`;
+        select.className = 'w-full bg-slate-900 border border-slate-700 text-white text-sm font-semibold rounded-xl p-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none capitalize text-center';
+        select.addEventListener('change', (e) => {
+          userAnswers[i] = e.target.value;
+        });
+
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.innerText = '-- Select --';
+        select.appendChild(defaultOpt);
+
+        activePitches.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.innerText = p.label;
+          select.appendChild(opt);
+        });
+
+        div.appendChild(label);
+        div.appendChild(select);
+        container.appendChild(div);
+      }
+    }
+
+    function calculatePitchFreq(pitch) {
+      const baseFreq = KEY_CONFIGS[activeKey].doBaseFreq;
+      // equal temperament semitone offset
+      return baseFreq * Math.pow(2, pitch.freqOffset / 12);
+    }
+
+    function playCurrentSequence() {
+      currentSequence.forEach((pitch, idx) => {
+        setTimeout(() => {
+          playTone(calculatePitchFreq(pitch), 0.45);
+        }, idx * 500);
+      });
+    }
+
+    function checkAnswers() {
+      // Validate complete selection
+      if (userAnswers.includes('')) {
+        const feedback = document.getElementById('feedback-msg');
+        feedback.innerText = 'Please select a solfege name for all notes!';
+        feedback.className = 'mt-4 text-center min-h-[28px] font-semibold text-sm text-amber-400';
+        return;
+      }
+
+      let correctCount = 0;
+      currentSequence.forEach((pitch, idx) => {
+        if (userAnswers[idx] === pitch.id) {
+          correctCount++;
+        }
+      });
+
+      const feedback = document.getElementById('feedback-msg');
+
+      if (correctCount === numPitches) {
+        streak++;
+        totalScore += numPitches;
+        if (streak > highScore) highScore = streak;
+
+        feedback.innerText = '✨ Excellent! All pitches are correct!';
+        feedback.className = 'mt-4 text-center min-h-[28px] font-semibold text-sm text-emerald-400';
+
+        updateStatsDisplays();
+        playCurrentSequence();
+
+        setTimeout(() => {
+          generateNewRound();
+        }, 1800);
+      } else {
+        streak = 0;
+        feedback.innerText = `Incorrect (${correctCount}/${numPitches} correct). Try again or re-check the settings!`;
+        feedback.className = 'mt-4 text-center min-h-[28px] font-semibold text-sm text-rose-400';
+        updateStatsDisplays();
+      }
+    }
+
+    function updateStatsDisplays() {
+      document.getElementById('streak-display').innerText = streak;
+      document.getElementById('high-score-display').innerText = highScore;
+      document.getElementById('total-score-display').innerText = totalScore;
+    }
+  </script>
+</body>
+</html>
+</script>
